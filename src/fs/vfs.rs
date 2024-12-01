@@ -48,6 +48,15 @@ impl VfsDirectory {
 		}
 		None
 	}
+
+	/// Removes a file or directory from the current directory
+	fn remove(&mut self, name: &String) -> Result<()> {
+		if self.children.remove(name).is_some() {
+				Ok(())
+		} else {
+				Err(Error::NotFound) // Return an error if the file/directory was not found
+		}
+	}
 }
 
 impl VfsNode for VfsDirectory {
@@ -155,6 +164,26 @@ impl VfsNodeDirectory for VfsDirectory {
 			Err(Error::InvalidArgument)
 		}
 	}
+
+	    fn traverse_remove(&mut self, components: &mut Vec<&str>) -> Result<()> {
+        if let Some(component) = components.pop() {
+            let node_name = String::from(component);
+
+            if components.is_empty() {
+                // We are at the end of the path, remove the file/directory
+                self.remove(&node_name)
+            } else {
+                // Traverse to the directory to the endpoint
+                if let Some(directory) = self.get_mut::<VfsDirectory>(&node_name) {
+                    directory.traverse_remove(components)
+                } else {
+                    Err(Error::InvalidArgument)
+                }
+            }
+        } else {
+            Err(Error::InvalidArgument)
+        }
+    }
 }
 
 /// Enumeration of possible methods to seek within an I/O object.
@@ -302,6 +331,18 @@ impl Vfs for Fs {
 				.traverse_mount(&mut components, addr, len)
 		} else {
 			Err(Error::InvalidFsPath)
+		}
+	}
+
+	fn remove_file(&mut self, path: &String) -> Result<()> {
+		if check_path(path) {
+				let mut components: Vec<&str> = path.split("/").collect();
+				components.reverse();
+				components.pop(); // Remove the last part of the path
+
+				self.handle.lock().traverse_remove(&mut components)
+		} else {
+				Err(Error::InvalidFsPath)
 		}
 	}
 }

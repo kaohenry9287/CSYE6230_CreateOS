@@ -21,6 +21,7 @@ pub enum Error {
 	BadFsPermission,
 	InvalidFsPath,
 	InvalidArgument,
+	NotFound,
 }
 
 impl fmt::Display for Error {
@@ -32,6 +33,7 @@ impl fmt::Display for Error {
 			Error::BadFsPermission => write!(f, "Bad file permission"),
 			Error::InvalidFsPath => write!(f, "Invalid file system path"),
 			Error::InvalidArgument => write!(f, "Inavlid argument"),
+			Error::NotFound => write!(f, "Not found"),
 		}
 	}
 }

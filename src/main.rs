@@ -32,8 +32,7 @@ extern "C" fn create_user_foo() {
 
 extern "C" fn foo() {
 	let tid = scheduler::get_current_taskid();
-
-	println!("hello from task {}", tid);
+    info!("Hello from task {}", tid);
 }
 
 /// This function is the entry point, since the linker looks for a function
@@ -41,22 +40,23 @@ extern "C" fn foo() {
 #[cfg(not(test))]
 #[no_mangle] // don't mangle the name of this function
 pub extern "C" fn main() -> ! {
+    info!("Operating System begins to start!");
+
 	arch::init();
 	mm::init();
 	scheduler::init();
 	fs::init();
 
-	println!("Hello from eduOS-rs!");
 
 	// Demonstrate memory allocation
     if let Some(ptr) = mm::simple_allocator::alloc(10) {
-        println!("Allocated memory at: {:?}", ptr);
+        info!("Allocated memory at: {:?}", ptr);
 
         // Deallocate the memory
         mm::simple_allocator::dealloc(ptr, 10);
-        println!("Deallocated memory.");
+        info!("Deallocated memory.");
     } else {
-        println!("Failed to allocate memory.");
+        info!("Failed to allocate memory.");
     }
 
 	// Initialize a FreeList
@@ -66,33 +66,31 @@ pub extern "C" fn main() -> ! {
     let entry = FreeListEntry::new(0x10000, 0x20000); // Example memory range
     freelist.list.push_back(entry);
 
-    println!("Initial FreeList:");
+    info!("FreeList initialized.");
     for node in freelist.list.iter() {
-        println!("Start: 0x{:X}, End: 0x{:X}", node.start, node.end);
+        info!("Start: 0x{:X}, End: 0x{:X}", node.start, node.end);
     }
 
     // Allocate memory from the FreeList
     if let Ok(addr) = freelist.allocate(0x1000, None) {
-        println!("Allocated 0x1000 bytes at 0x{:X}", addr);
+        info!("Allocated 0x1000 bytes at 0x{:X}", addr);
     } else {
-        println!("Allocation failed");
+        info!("Allocation failed");
     }
 
-    println!("FreeList after allocation:");
+    info!("FreeList after allocation:");
     for node in freelist.list.iter() {
-        println!("Start: 0x{:X}, End: 0x{:X}", node.start, node.end);
+        info!("Start: 0x{:X}, End: 0x{:X}", node.start, node.end);
     }
 
     // Deallocate memory back to the FreeList
     freelist.deallocate(0x10000, 0x1000);
 
-    println!("FreeList after deallocation:");
+    info!("FreeList after deallocation:");
     for node in freelist.list.iter() {
-        println!("Start: 0x{:X}, End: 0x{:X}", node.start, node.end);
+        info!("Start: 0x{:X}, End: 0x{:X}", node.start, node.end);
     }
 
-	info!("Print file system:");
-	fs::lsdir().unwrap();
 
 	for _i in 0..1 {
 		scheduler::spawn(foo, NORMAL_PRIORITY).unwrap();
@@ -104,8 +102,7 @@ pub extern "C" fn main() -> ! {
 
 	scheduler::reschedule();
 
-	println!("Shutdown system!");
-
+    info!("Shutdown system!");
 	// shutdown system
 	arch::processor::shutdown();
 }

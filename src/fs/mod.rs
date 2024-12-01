@@ -22,6 +22,7 @@ use core::convert::TryInto;
 use core::include_bytes;
 
 static DEMO: &[u8] = include_bytes!("../../demo/hello");
+static TEST: &[u8] = include_bytes!("../../demo/test");
 
 /// Type of the VfsNode
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -79,6 +80,9 @@ trait VfsNodeDirectory: VfsNode + core::fmt::Debug + core::marker::Send + core::
 
 	/// Mound memory region as file
 	fn traverse_mount(&mut self, _components: &mut Vec<&str>, addr: u64, len: u64) -> Result<()>;
+
+	fn traverse_remove(&mut self, components: &mut Vec<&str>) -> Result<()>;
+
 }
 
 /// The trait `Vfs` specifies all operation on the virtual file systems.
@@ -96,6 +100,9 @@ trait Vfs: core::fmt::Debug + core::marker::Send + core::marker::Sync {
 
 	/// Mound memory region as file
 	fn mount(&mut self, path: &String, addr: u64, len: u64) -> Result<()>;
+
+	/// Remove a file at the given path.
+	fn remove_file(&mut self, path: &String) -> Result<()>;
 }
 
 /// Enumeration of possible methods to seek within an I/O object.
@@ -165,6 +172,7 @@ pub fn init() {
 
 	root.mkdir(&String::from("/bin")).unwrap();
 	root.mkdir(&String::from("/dev")).unwrap();
+	root.mkdir(&String::from("/etc")).unwrap();
 
 	if DEMO.len() > 0 {
 		info!(
@@ -180,7 +188,31 @@ pub fn init() {
 		.expect("Unable to mount file");
 	}
 
-	//root.lsdir().unwrap();
+	if TEST.len() > 0 {
+		info!(
+			"Found mountable file at 0x{:x} (len 0x{:x})",
+			&TEST as *const _ as u64,
+			TEST.len()
+		);
+		root.mount(
+			&String::from("/etc/test"),
+			TEST.as_ptr() as u64,
+			TEST.len().try_into().unwrap(),
+		)
+		.expect("Unable to mount file");
+
+	}
+	info!("--- Before removing file:");
+	root.lsdir().unwrap();
+
+	root.remove_file(&String::from("/etc/test"))
+	.expect("Unable to remove file");
+
+	info!("File /etc/test removed successfully");
+
+	info!("--- After removing file:");
+	root.lsdir().unwrap();
+
 	//info!("root {:?}", root);
 	unsafe {
 		VFS_ROOT = Some(root);

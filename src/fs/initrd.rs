@@ -95,6 +95,10 @@ impl RomHandle {
 		let guard = self.data.read();
 		guard.len() as usize
 	}
+		
+	pub fn remove_file(&mut self) -> Result<()> {
+		Ok(())
+	}
 }
 
 impl Clone for RomHandle {
@@ -231,6 +235,19 @@ impl RamHandle {
 		let guard = self.data.read();
 		let ref vec: &Vec<u8> = guard.deref();
 		vec.len() as usize
+	}
+
+	pub fn remove_file(&mut self) -> Result<()> {
+		if !self.writeable {
+				return Err(Error::BadFsPermission);
+		}
+
+		let mut guard = self.data.write();
+		guard.clear(); 
+		let mut pos_guard = self.pos.lock();
+		*pos_guard = 0; 
+
+		Ok(())
 	}
 }
 
