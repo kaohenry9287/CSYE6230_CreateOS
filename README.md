@@ -1,5 +1,7 @@
 # LightOS-rs - A lightweight testing operating system written in Rust
 
+<img width="498" alt="截圖 2024-12-01 下午3 28 31" src="https://github.com/user-attachments/assets/b8881062-d799-4f9b-a18c-16904d8a1701">
+
 ## Introduction
 
 LightOS-rs is a Unix-like operating system based on a monolithic architecture for educational purposes.
