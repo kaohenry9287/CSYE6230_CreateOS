@@ -3,7 +3,7 @@
 ## Introduction
 
 LightOS-rs is a Unix-like operating system based on a monolithic architecture for educational purposes.
-It is developed for the course [CSYE6230: Operating Systems][acsos] at Northeastern University and includes a modified hypervisor that simplifies the boot process to increase the intelligibility of the OS.
+It is developed for the course "CSYE6230: Operating Systems" at Northeastern University and includes a modified hypervisor that simplifies the boot process to increase the intelligibility of the OS.
 
 Here are the 4 main function of this OS:
 
