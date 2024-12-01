@@ -1,0 +1,14 @@
+[unstable]
+build-std = ["core", "alloc"]
+build-std-features = ["compiler-builtins-mem"]
+
+[build]
+target = "x86_64-eduos.json"
+
+[target.aarch64-eduos]
+rustflags = [
+  "-C", "link-arg=-Tsrc/arch/x86_64/linker.ld"
+]
+
+[target.x86_64-eduos]
+runner = "bootimage runner"

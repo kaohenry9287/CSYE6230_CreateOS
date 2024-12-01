@@ -1,0 +1,29 @@
+name: Check format
+
+on:
+  push:
+    branches:
+      - main
+      - stage8
+  pull_request:
+    branches:
+      - main
+      - stage8
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+         submodules: true
+    - name: Check Cargo availability
+      run: cargo --version
+    - name: Check Formatting
+      run: cargo fmt -- --check
